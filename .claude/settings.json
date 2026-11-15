@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 tools/board.py:*)",
+      "Bash(python tools/board.py:*)",
+      "Bash(python3 -m unittest discover tools:*)",
+      "Bash(git pull:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)"
+    ]
+  }
+}

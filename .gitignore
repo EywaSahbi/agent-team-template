@@ -1,0 +1,21 @@
+.DS_Store
+
+# board read cursors (per clone)
+.board/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# node
+node_modules/
+dist/
+
+# secrets and local settings
+.env
+.env.*
+!.env.example
+.claude/settings.local.json

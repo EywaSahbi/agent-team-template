@@ -1,0 +1,6 @@
+# Project config for Codex (applies once you trust this project).
+# The board (`gh`) and `git push` need the network, which the workspace-write sandbox blocks by default.
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = true

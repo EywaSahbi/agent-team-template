@@ -1,0 +1,38 @@
+#!/bin/sh
+# Folder-ownership guard (see AGENTS.md "Team and ownership"). Who may write where: tools/team.conf.
+# Enable once per clone:  git config core.hooksPath tools/hooks && git config team.role <role>
+# Humans changing shared files on purpose:  ALLOW_SHARED=1 git commit ...   (agents: only when their human asks)
+
+[ "$ALLOW_SHARED" = "1" ] && exit 0
+set -f  # no glob expansion of the path prefixes
+
+conf=tools/team.conf
+[ -f "$conf" ] || { echo "pre-commit: $conf not found" >&2; exit 1; }
+
+# team.conf role lines: "<role> <login> <path prefixes...>"; lines with "=" are settings; "#" starts a comment.
+strip='{ sub(/\r$/, ""); sub(/#.*/, "") }'
+roles=$(awk "$strip"' NF >= 3 && !/=/ { printf "%s%s", sep, $1; sep = "|" }' "$conf")
+role=$(git config team.role)
+allowed=$(awk -v r="$role" "$strip"' NF >= 3 && !/=/ && $1 == r { for (i = 3; i <= NF; i++) printf "%s ", $i }' "$conf")
+
+if [ -z "$role" ] || [ -z "$allowed" ]; then
+  echo "pre-commit: set this clone's role first: git config team.role <$roles>" >&2
+  exit 1
+fi
+
+bad=$(git -c core.quotePath=false diff --cached --name-only --no-renames | while IFS= read -r f; do
+  ok=0
+  for p in $allowed; do
+    case "$f" in ("$p"*) ok=1 ;; esac
+  done
+  [ $ok -eq 0 ] && echo "  $f"
+done)
+
+if [ -n "$bad" ]; then
+  echo "pre-commit: role '$role' may only commit inside: $allowed" >&2
+  echo "These staged files belong to another role or are shared:" >&2
+  echo "$bad" >&2
+  echo "Unstage them (git restore --staged <file>) and post a NEED on the board to the owner." >&2
+  exit 1
+fi
+exit 0

@@ -1,0 +1,5 @@
+# hooks, scripts and the team config must keep LF endings or sh breaks on Windows checkouts
+tools/hooks/* text eol=lf
+tools/team.conf text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
